@@ -45,6 +45,43 @@ button{border:0;cursor:pointer}
 .field-invalid{border-color:#b91c1c!important;box-shadow:0 0 0 3px rgba(185,28,28,.12)!important;background:#fff7f7!important}
 .field-error-text{display:block;margin-top:4px;color:#b91c1c;font-size:12px;font-weight:700}
 
+/* Demo login copyright/disclaimer */
+.demo-warning{
+  margin:10px 0 12px;
+  padding:9px 10px;
+  background:#fff3cd;
+  color:#856404;
+  border:1px solid #ffeeba;
+  border-radius:10px;
+  font-size:12px;
+  text-align:center;
+  font-weight:800;
+}
+.demo-copyright{
+  margin-top:16px;
+  padding:12px;
+  font-size:11px;
+  line-height:1.5;
+  color:#4b5563;
+  background:#f9fafb;
+  border-left:4px solid var(--primary);
+  border-radius:10px;
+  text-align:center;
+}
+.demo-copyright strong{
+  display:block;
+  margin-bottom:4px;
+  color:var(--primary);
+  font-size:12px;
+  letter-spacing:.04em;
+}
+.demo-copyright .copyright-line{
+  display:block;
+  margin-top:8px;
+  color:#111827;
+  font-weight:800;
+}
+
 </style>
   <script>
     window.addEventListener('error', function(event) {
@@ -209,7 +246,45 @@ function render(){
   document.getElementById('app').innerHTML=`<div class="shell"><aside class="sidebar"><div class="brand"><div class="logo">ME</div><div><h1>Wholesale Meat ERP</h1><p>Meat • POS • Accounting</p></div></div><div class="user-pill"><b>${esc(session.name)}</b><br>${esc(session.role)}<br><small>${esc(session.email)}</small></div><div class="nav">${nav.map(([k,v])=>`<button class="${currentPage===k?'active':''}" onclick="go('${k}')">${v}</button>`).join('')}<button onclick="logout()">Logout</button></div></aside><main class="main"><div class="topbar"><div><h2>${esc(nav.find(n=>n[0]===currentPage)?.[1]||'Dashboard')}</h2><p>${esc(state.settings.companyName)} • ${today()}</p></div><div class="actions no-print"><button class="btn ghost small" onclick="window.print()">Print</button><button class="btn ghost small" onclick="exportJson()">Backup JSON</button></div></div><div id="page"></div></main></div>`;
   pages[currentPage]();
 }
-function renderLogin(){ document.getElementById('app').innerHTML=`<div class="login-wrap"><div class="login-card"><div class="brand"><div class="logo">ME</div><div><h1>Wholesale Meat ERP</h1><p>Wholesale meat management system</p></div></div><div class="hint"><b>Demo logins:</b><br>admin@meat.erp / 123456<br>supervisor@meat.erp / 123456<br>accountant@meat.erp / 123456<br>cashier@meat.erp / 123456</div><form onsubmit="login(event)"><div class="form-row"><label>Email</label><input id="email" value="admin@meat.erp" required></div><div class="form-row"><label>Password</label><input id="password" type="password" value="123456" required></div><button class="btn" style="width:100%">Login</button></form><p style="color:#6b7280;font-size:13px;margin-top:15px">Demo uses browser storage. Connect to Supabase/PostgreSQL before live use.</p></div></div>`; }
+function renderLogin(){
+  document.getElementById('app').innerHTML=`
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="brand">
+          <div class="logo">ME</div>
+          <div>
+            <h1>Wholesale Meat ERP</h1>
+            <p>Wholesale meat management system</p>
+          </div>
+        </div>
+
+        <div class="demo-warning">Demo access only. Source code is not included.</div>
+
+        <div class="hint">
+          <b>Demo logins:</b><br>
+          admin@meat.erp / 123456<br>
+          supervisor@meat.erp / 123456<br>
+          accountant@meat.erp / 123456<br>
+          cashier@meat.erp / 123456
+        </div>
+
+        <form onsubmit="login(event)">
+          <div class="form-row"><label>Email</label><input id="email" value="admin@meat.erp" required></div>
+          <div class="form-row"><label>Password</label><input id="password" type="password" value="123456" required></div>
+          <button class="btn" style="width:100%">Login</button>
+        </form>
+
+        <p style="color:#6b7280;font-size:13px;margin-top:15px">Demo uses browser storage. Connect to Supabase/PostgreSQL before live use.</p>
+
+        <div class="demo-copyright">
+          <strong>DEMO VERSION — COPYRIGHT NOTICE</strong>
+          This system is provided for demonstration and evaluation purposes only. Access to this demo does not grant ownership, source code rights, resale rights, modification rights, or distribution rights.<br><br>
+          All software, design, workflows, source code, database structure, reports, screens, and business logic remain the intellectual property of AriQ Digital Solutions. Copying, reselling, modifying, reverse engineering, or distributing this system without written permission is strictly prohibited.
+          <span class="copyright-line">© 2026 AriQ Digital Solutions. All Rights Reserved.</span>
+        </div>
+      </div>
+    </div>`;
+}
 function login(e){ e.preventDefault(); const emailEl=document.getElementById('email'); const passEl=document.getElementById('password'); const u=state.users.find(x=>x.email===emailEl.value.trim() && x.password===passEl.value && x.active); if(!u) return alert('Invalid login'); session={id:u.id,name:u.name,email:u.email,role:u.role}; localStorage.setItem('meatERP.session',JSON.stringify(session)); audit('Login','User logged in'); render(); }
 function logout(){ localStorage.removeItem('meatERP.session'); session=null; renderLogin(); }
 function go(p){ currentPage=p; render(); }
