@@ -12,7 +12,8 @@ module.exports=async function(req,res){
   const username=String(body.username||'').trim(); const password=String(body.password||'');
   if(!username||!password) return json(res,400,{error:'Username and password are required.'});
   if(!env('SUPABASE_URL')||!env('SUPABASE_ANON_KEY')||!env('SUPABASE_SERVICE_ROLE_KEY')) return json(res,500,{error:'Authentication is not configured.'});
-  const rows=await adminRequest(`/rest/v1/erp_profiles?select=id,email,username,full_name,role,active,force_password_change,company_id&username=eq.${encodeURIComponent(username)}&limit=1`);
+  const lookup=encodeURIComponent(username);
+  const rows=await adminRequest(`/rest/v1/erp_profiles?select=id,email,username,full_name,role,active,force_password_change,company_id&or=(username.eq.${lookup},email.eq.${lookup})&limit=1`);
   const profile=rows?.[0];
   if(!profile || profile.active===false) return json(res,401,{error:'Invalid username or password.'});
   const r=await fetch(`${base()}/auth/v1/token?grant_type=password`,{method:'POST',headers:{apikey:env('SUPABASE_ANON_KEY'),'Content-Type':'application/json'},body:JSON.stringify({email:profile.email,password})});
